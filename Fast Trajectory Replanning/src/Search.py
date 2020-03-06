@@ -1,7 +1,7 @@
 import heapq
-from random import randint
 from Environment import Environment
 from Environment import Cell
+import pdb
 
 class Node:
     def __init__(self, row, column, parent, g, h, f, tie):
@@ -30,11 +30,13 @@ class Coord:
     def __init__(self, row, column):
         self.row = row
         self.column = column
+    def __eq__(self, other):
+        return self.row == other.row and self.column == other.column
 
 
 def forward_a(start, target, env):
     open_list = []
-    closed_list = set()
+    closed_list = []
     check = False
     heapq.heapify(open_list)
     start.h = abs((start.row - target.row)) + abs((start.column - target.column))
@@ -48,23 +50,25 @@ def forward_a(start, target, env):
         if curr_node.row == target.row and curr_node.column == target.column:
             check = True
             break
-        neighbors = env.expand_cell(curr_node)
+        temp_cell = env.environment_map[curr_node.row][curr_node.column]
+        neighbors = env.expand_cell(temp_cell)
         cell = Coord(curr_node.row, curr_node.column)
-        closed_list.add(cell)
+        closed_list.append(cell)
         for k in neighbors:
-            temp = neighbors[k]
-            temp_node = Node(temp[0], temp[1], None, None, None, None, None)
+            temp = k
+            temp_node = Node(temp.row, temp.column, None, None, None, None, None)
             if temp_node not in closed_list:
                 if temp_node not in open_list:
-                    temp_node.h = abs((temp_node.row - target.row)) + abs(
-                        (temp_node.column - target.column)
-                    )
+                    temp_node.h = abs((temp_node.row - target.row)) + abs((temp_node.column - target.column))
                     temp_node.g = curr_node.g + 1
                     temp_node.f = temp_node.g + temp_node.h
                     heapq.heappush(open_list, temp_node)
                     temp_node.parent = curr_node
                 else:
-                    temp_g = curr_node.g + 1
+                    temp_g = curr_node.g + 1 #TODO: Make temp_node.g reference already created object
+                    for m in open_list:
+                        if temp_node == m:
+                            temp_node = m
                     if temp_g < temp_node.g:
                         temp_node.g = temp_g
                         temp_node.f = temp_node.g + temp_node.h
@@ -72,16 +76,17 @@ def forward_a(start, target, env):
                         heapq.heapify(open_list)
     if check:
         result_list = []
-        while curr_node != None:
+        while curr_node is not None:
             result_list.append(curr_node)
             curr_node = curr_node.parent
-        return result_list.reverse(), closed_list
+        result_list.reverse()
+        return result_list, closed_list
     else:
         return None, None
     
-def diff_tie_break(start, target):
+def diff_tie_break(start, target, env):
     open_list = []
-    closed_list = set()
+    closed_list = []
     check = False
     heapq.heapify(open_list)
     start.h = abs((start.row - target.row)) + abs((start.column - target.column))
@@ -95,23 +100,25 @@ def diff_tie_break(start, target):
         if curr_node.row == target.row and curr_node.column == target.column:
             check = True
             break
-        neighbors = expand_node(curr_node)
+        temp_cell = env.environment_map[curr_node.row][curr_node.column]
+        neighbors = env.expand_cell(temp_cell)
         cell = Coord(curr_node.row, curr_node.column)
-        closed_list.add(cell)
+        closed_list.append(cell)
         for k in neighbors:
-            temp = neighbors[k]
-            temp_node = Node(temp[0], temp[1], None, None, None, None, 0)
+            temp = k
+            temp_node = Node(temp.row, temp.column, None, None, None, None, 0)
             if temp_node not in closed_list:
                 if temp_node not in open_list:
-                    temp_node.h = abs((temp_node.row - target.row)) + abs(
-                        (temp_node.column - target.column)
-                    )
+                    temp_node.h = abs((temp_node.row - target.row)) + abs((temp_node.column - target.column))
                     temp_node.g = curr_node.g + 1
                     temp_node.f = temp_node.g + temp_node.h
                     heapq.heappush(open_list, temp_node)
                     temp_node.parent = curr_node
                 else:
-                    temp_g = curr_node.g + 1
+                    temp_g = curr_node.g + 1 #TODO: Make temp_node.g reference already created object
+                    for m in open_list:
+                        if temp_node == m:
+                            temp_node = m
                     if temp_g < temp_node.g:
                         temp_node.g = temp_g
                         temp_node.f = temp_node.g + temp_node.h
@@ -119,10 +126,11 @@ def diff_tie_break(start, target):
                         heapq.heapify(open_list)
     if check:
         result_list = []
-        while curr_node != None:
+        while curr_node is not None:
             result_list.append(curr_node)
             curr_node = curr_node.parent
-        return result_list.reverse(), closed_list
+        result_list.reverse()
+        return result_list, closed_list
     else:
         return None, None
 """For adaptive A*, must run normal A* once, and if path becomes
@@ -132,7 +140,7 @@ def diff_tie_break(start, target):
     (whether that be normal or adaptive is irrelevant).  expanded_list
     is equal to the closed_list returned by the previous A* run since
     the heuristics is only being changed for expanded nodes."""
-def adaptive_a(start, target, g_goal, expanded_list):
+def adaptive_a(start, target, g_goal, expanded_list, env):
     open_list = []
     closed_list = set()
     check = False
@@ -147,7 +155,7 @@ def adaptive_a(start, target, g_goal, expanded_list):
         if curr_node.row == target.row and curr_node.column == target.column:
             check = True
             break
-        neighbors = expand_node(curr_node)
+        neighbors = env.expand_cell(curr_node)
         cell = Coord(curr_node.row, curr_node.column)
         closed_list.add(cell)
         for k in neighbors:
