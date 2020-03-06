@@ -1,21 +1,28 @@
 import random
 import tkinter
-#from Search import Coord
 
+class Coord:
+    def __init__(self, row, column):
+        self.row = row
+        self.column = column
+                  
 class Cell:
-    def __init__(self, x, y, representation, blocked, seen, visited):
+    def __init__(self, x, y, representation, blocked, seen, visited, parent):
         self.x = x
         self.y = y
         self.representation = representation
         self.blocked = blocked
         self.seen = seen
         self.visited = visited
+        self.parent = parent
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
         
 class Environment:
     def __init__(self, row, column):
         self.row = row
         self.column = column
-        self.environment_map = [[Cell(x, y, " ", False, False, False) for y in range(101)] for x in range(101)]
+        self.environment_map = [[Cell(x, y, " ", False, False, False, None) for y in range(101)] for x in range(101)]
                   
     def visit_cells(self, cell):
         neighbors = []
@@ -172,12 +179,20 @@ class Environment:
                 target = self.environment_map[x][y]
         return agent, target
     
-class Coord:
-    def __init__(self, row, column):
-        self.row = row
-        self.column = column   
-                        
-test = Environment(random.randint(0, 100),random.randint(0,100))
-test.create_env(test.environment_map[test.row][test.column])
-test.agent_and_target()
-test.print_env()
+    def diff_agent_and_target(self):
+        agent = self.environment_map[0][100]
+        target = self.environment_map[100][0]
+        agent.representation = 'A' 
+        agent.blocked = False
+        target.representation = 'T'
+        target.blocked = False
+        return agent, target
+    
+    def clear_cells(self):
+        for x in range(101):
+            for y in range(101):
+                cell = self.environment_map[x][y]
+                cell.seen = False
+                cell.parent = None
+                if cell.representation == ".":
+                    cell.representation = " "        
