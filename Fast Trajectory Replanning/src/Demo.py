@@ -1,7 +1,8 @@
 import random
 import Environment
 import Search
-import pdb
+import time
+
 def run(env, agent, target):
     env.reveal_cells(agent)
     big_loop = True
@@ -16,13 +17,13 @@ def run(env, agent, target):
             while loop:
                 tie_type = int (input("Which way would you like to break ties? (Greater G-Value [1], Smaller G-Value [2])"))
                 if tie_type == 1:
+                    start = time.time()
                     prev_cell = None
                     while check is False:     
                         path, expand_list = Search.forward_a(agent_node, tar_node, env)
                         if path is None:
                             break
-                        for l in expand_list:
-                            count += 1
+                        count += len(expand_list)
                         for k in path:
                             x = k.row
                             y = k.column
@@ -48,21 +49,22 @@ def run(env, agent, target):
                                 prev_cell = pos_cell
                             else:
                                 break
+                    end = time.time()
                     if check:
-                        print("Congratulations! The agent made its way to the target in " + " seconds and expanded " + str(count) + " cells using Forward A*.")
+                        print("Congratulations! The agent made its way to the target in " + str(round(end - start, 3)) + " seconds and expanded " + str(count) + " cells using Forward A*.")
                     else:
-                        print("Unfortunately, the agent could not find its way to the target using Forward A*. The agent expanded " + str(count) + " cells and discovered the blocked path in " + " seconds.")
+                        print("Unfortunately, the agent could not find its way to the target using Forward A*. The agent expanded " + str(count) + " cells and discovered the blocked path in " + str(round(end - start, 3)) + " seconds.")
                     loop = False
                     big_loop = False
                     env.print_env()
                 elif tie_type == 2:
+                    start = time.time()
                     prev_cell = None
                     while check is False:     
                         path, expand_list = Search.diff_tie_break(agent_node, tar_node, env)
                         if path is None:
                             break
-                        for l in expand_list:
-                            count += 1
+                        count += len(expand_list)
                         for k in path:
                             x = k.row
                             y = k.column
@@ -88,16 +90,18 @@ def run(env, agent, target):
                                 prev_cell = pos_cell
                             else:
                                 break
+                    end = time.time()
                     if check:
-                        print("Congratulations! The agent made its way to the target in " + " seconds and expanded " + str(count) + " cells using Forward A*.")
+                        print("Congratulations! The agent made its way to the target in " + str(round(end - start, 3)) + " seconds and expanded " + str(count) + " cells using Forward A*.")
                     else:
-                        print("Unfortunately, the agent could not find its way to the target using Forward A*. The agent expanded " + str(count) + " cells and discovered the blocked path in " + " seconds.")
+                        print("Unfortunately, the agent could not find its way to the target using Forward A*. The agent expanded " + str(count) + " cells and discovered the blocked path in " + str(round(end - start, 3)) + " seconds.")
                     loop = False
                     big_loop = False
                     env.print_env()
                 else:
                     print("Error: Please enter valid input")
         elif search_type == 2:
+            start = time.time()
             agent_node = Search.Node(agent.x, agent.y, None, None, None, None, None)
             tar_node = Search.Node(target.x, target.y, None, None, None, None, None)
             prev_cell = None
@@ -105,8 +109,7 @@ def run(env, agent, target):
                 path, expand_list = Search.forward_a(tar_node, agent_node, env)
                 if path is None:
                     break
-                for l in expand_list:
-                    count += 1
+                count += len(expand_list)
                 path.reverse()
                 for k in path:
                     x = k.row
@@ -133,13 +136,15 @@ def run(env, agent, target):
                         prev_cell = pos_cell
                     else:
                         break
+            end = time.time()
             if check:
-                print("Congratulations! The agent made its way to the target in " + " seconds and expanded " + str(count) + " cells using Backward A*.")
+                print("Congratulations! The agent made its way to the target in " + str(round(end - start, 3)) + " seconds and expanded " + str(count) + " cells using Backward A*.")
             else:
-                print("Unfortunately, the agent could not find its way to the target using Backward A*. The agent expanded " + str(count) + " cells and discovered the blocked path in " + " seconds.")
+                print("Unfortunately, the agent could not find its way to the target using Backward A*. The agent expanded " + str(count) + " cells and discovered the blocked path in " + str(round(end - start, 3)) + " seconds.")
             big_loop = False
             env.print_env()
         elif search_type == 3:
+            start = time.time()
             agent_node = Search.Node(agent.x, agent.y, None, None, None, None, None)
             tar_node = Search.Node(target.x, target.y, None, None, None, None, None)
             prev_cell = None
@@ -159,11 +164,9 @@ def run(env, agent, target):
                     set_diff = set_1 - set_2
                     expanded_list = expanded_list + list(set_diff)
                 if path is None:
-                    break
-                for j in path:
-                    g_goal += 1
-                for l in expand_list:
-                    count += 1
+                    break    
+                g_goal += len(path)
+                count += len(expand_list)
                 for k in path:
                     x = k.row
                     y = k.column
@@ -189,10 +192,11 @@ def run(env, agent, target):
                             prev_cell = pos_cell
                     else:
                         break
+            end = time.time()
             if check:
-                print("Congratulations! The agent made its way to the target in " + " seconds and expanded " + str(count) + " cells using Adaptive A*.")
+                print("Congratulations! The agent made its way to the target in " + str(round(end - start, 3)) + " seconds and expanded " + str(count) + " cells using Adaptive A*.")
             else:
-                print("Unfortunately, the agent could not find its way to the target using Adaptive A*. The agent expanded " + str(count) + " cells and discovered the blocked path in " + " seconds.")
+                print("Unfortunately, the agent could not find its way to the target using Adaptive A*. The agent expanded " + str(count) + " cells and discovered the blocked path in " + str(round(end - start, 3)) + " seconds.")
             big_loop = False
             env.print_env()
         else:
