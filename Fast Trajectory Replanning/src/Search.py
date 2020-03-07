@@ -1,7 +1,4 @@
 import heapq
-from Environment import Environment
-from Environment import Cell
-import pdb
 
 class Node:
     def __init__(self, row, column, parent, g, h, f, tie):
@@ -30,6 +27,10 @@ class Coord:
     def __init__(self, row, column):
         self.row = row
         self.column = column
+    def __str__(self):
+        return str(self.row) + str(self.column)
+    def __hash__(self):
+        return hash(str(self))            
     def __eq__(self, other):
         return self.row == other.row and self.column == other.column
 
